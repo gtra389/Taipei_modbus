@@ -1,0 +1,110 @@
+#!/usr/bin/env python
+#
+# Available device: Liquid level sensor
+# Manufacturer: AQUAS Inc.
+# Product number: SMR02
+# Serial communication protocol: RS485
+# Purpose:
+# Measure ground water level every 10 mins (Unit in meter)
+#
+
+# Including
+from statistics import median
+import minimalmodbus
+import time
+from time import gmtime, strftime
+from urllib.request import urlopen
+
+minimalmodbus.BAUDRATE = 19200
+wL_slaveAddr = 1
+devName = '/dev/ttyUSB0' # RPI    format
+comName = 'COM5'        # Window format
+
+id_No = "4001"
+countNum_Loop = -1
+
+def wLRead(slp,intcpt): 
+    # Port name, slave address (in decimal)
+    instrument_wL = minimalmodbus.Instrument(comName, wL_slaveAddr) 
+    try:
+        samplingList = []
+        medianVal = 0
+        countNum  = 0
+        sampleNum = 10
+        while (countNum <= sampleNum): 
+            # Register address / Number of registers / Function code
+            ReadingValue = instrument_wL.read_registers(0,2,4)
+            power = len(str(ReadingValue[0]))
+            ArrangeValue = ReadingValue[1] + ReadingValue[0]/(10**power)
+            samplingList.append(ArrangeValue)
+            countNum += 1
+            print(countNum)
+            time.sleep(1) # Wait for 1 second
+            
+        medianVal = median(samplingList)
+        wLVal     = round(slp * medianVal + intcpt, 3)
+        
+        idn = instrument_wL.read_register(1, 0, 3)
+        print('-----Liquid level sensor-----')
+        print('id = '+str(idn))
+        print('water level = ' + str(wLVal) + ' m')                
+             
+    except IOError:
+        wLVal = 0
+        print("Failed to read from instrument")
+        print('------------------------')
+        
+    return wLVal
+
+def httpPOST(String0, String1, String2, String3):    
+    try:
+        global timeStamp
+        timeStamp = strftime("%Y%m%d%H%M%S")
+        url = 'http://ec2-54-175-179-28.compute-1.amazonaws.com/update_general.php?' + \
+              'site=Demo&' + \
+              'time='+ repr(timeStamp)+ \
+              '&weather=0' + \
+              '&id='+ str(String0) + \
+              '&air=0' + \
+              '&acceleration=0' + \
+              '&cleavage=0' + \
+              '&incline=0' + \
+              '&field1='+repr(String1)+ \
+              '&field2='+repr(String2)+ \
+              '&field3='+repr(String3)
+        
+        resp = urlopen(url).read()
+        print(resp)
+        print('------------------------')
+    except:
+        print('We have an error!')
+        time.sleep(30) # Wait for 30 sec
+        resp = urlopen(url).read()
+        print(resp)
+        print('------------------------')
+    
+try:
+    while True:
+        slope = 0.00108
+        intercept = -16.99745
+        data1 = wLRead(slope, intercept)
+        data2 = 0
+        
+        while (countNum_Loop < 0):
+            httpPOST(id_No, data1, data2, "Reboot")
+            countNum_Loop += 1
+            
+        if countNum_Loop == -1:
+            break
+            
+        httpPOST(id_No, data1, data2, 0)            
+        
+        print("Upload time : %s" % timeStamp)        
+        print('------------------------')
+        
+        minimalmodbus.CLOSE_PORT_AFTER_EACH_CALL=True
+        time.sleep(20) # Wait for 10 mins
+        
+except KeyboardInterrupt:
+    print("Stop")
+    print('------------------------')
