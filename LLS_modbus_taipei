@@ -13,7 +13,8 @@ from statistics import median
 import minimalmodbus
 import time
 from time import gmtime, strftime
-from urllib.request import urlopen
+# from urllib.request import urlopen
+from urllib2 import urlopen
 
 minimalmodbus.BAUDRATE = 19200
 wL_slaveAddr = 1
@@ -25,7 +26,8 @@ countNum_Loop = -1
 
 def wLRead(slp,intcpt): 
     # Port name, slave address (in decimal)
-    instrument_wL = minimalmodbus.Instrument(comName, wL_slaveAddr) 
+    # instrument_wL = minimalmodbus.Instrument(comName, wL_slaveAddr) 
+    instrument_wL = minimalmodbus.Instrument(devName, wL_slaveAddr)
     try:
         samplingList = []
         medianVal = 0
@@ -64,7 +66,7 @@ def httpPOST(String0, String1, String2, String3):
               'site=Demo&' + \
               'time='+ repr(timeStamp)+ \
               '&weather=0' + \
-              '&id='+ str(String0) + \
+              '&id='+ repr(String0) + \
               '&air=0' + \
               '&acceleration=0' + \
               '&cleavage=0' + \
@@ -73,8 +75,23 @@ def httpPOST(String0, String1, String2, String3):
               '&field2='+repr(String2)+ \
               '&field3='+repr(String3)
         
+        url_TT ='http://data.thinktronltd.com/TCGEMSIS/GETMTDATA.aspx?' + \
+              'site=Demo&' + \
+              'time='+ repr(timeStamp)+ \
+              '&weather=0' + \
+              '&id='+ repr(String0) + \
+              '&air=0' + \
+              '&acceleration=0' + \
+              '&cleavage=0' + \
+              '&incline=0' + \
+              '&field1='+repr(String1)+ \
+              '&field2='+repr(String2)+ \
+              '&field3='+repr(String3) 
+        
         resp = urlopen(url).read()
+        resp_TT = urlopen(url_TT).read()
         print(resp)
+        print(resp_TT)
         print('------------------------')
     except:
         print('We have an error!')
@@ -103,8 +120,9 @@ try:
         print('------------------------')
         
         minimalmodbus.CLOSE_PORT_AFTER_EACH_CALL=True
-        time.sleep(20) # Wait for 10 mins
+        time.sleep(60*10) # Wait for 10 mins
         
 except KeyboardInterrupt:
+    print('------------------------')
     print("Stop")
     print('------------------------')
