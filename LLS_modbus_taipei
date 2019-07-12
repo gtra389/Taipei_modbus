@@ -16,13 +16,57 @@ from time import gmtime, strftime
 # from urllib.request import urlopen
 from urllib2 import urlopen
 
+# Definition of variable
 minimalmodbus.BAUDRATE = 19200
 wL_slaveAddr = 1
+rg_slaveAddr = 2
 devName = '/dev/ttyUSB0' # RPI    format
 comName = 'COM5'        # Window format
-
-id_No = "4001"
+id_No = "4999"
 countNum_Loop = -1
+
+# 
+befVal    = 8888
+countVal  = 0
+bucketVal = 0.2  # Unit in mm
+rfInts    = 0    # Unit in mm/hr
+
+'''
+def rfRead():
+    global befVal
+    # Port name, slave address (in decimal)
+    instrument_2 = minimalmodbus.Instrument(comName, slaveAddr) 
+    try:
+        # Register number, number of decimals, function code
+        rf_realVal = instrument_2.read_register(0, 0, 4)               
+    except IOError:
+        print("Failed to read from instrument")
+        print('------------------------')    
+    
+    rf_refVal   = [0, 13107, 26215, 39322, 52429]
+    boolTemp1   = rf_realVal in rf_refVal
+    while boolTemp1:
+        if (rf_realVal != befVal):
+            print("Detect additional rainfall")
+            print('------------------------')
+            befVal = rf_realVal
+            break
+        else:
+            boolTemp1 = not boolTemp1
+            break
+    print("Additional rainfall (T/F):",boolTemp1)
+    print("Read value:", rf_realVal)
+    print("Previous value:", befVal)
+    print('------------------------')
+    
+    while boolTemp1:
+        countVal += 1
+        break
+        
+    rfDep = countVal * bucketVal
+    return rfDep
+'''
+
 
 def wLRead(slp,intcpt): 
     # Port name, slave address (in decimal)
