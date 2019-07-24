@@ -23,8 +23,8 @@ import minimalmodbus
 import time
 import schedule
 from time import gmtime, strftime
-from urllib.request import urlopen
-#from urllib2 import urlopen
+# from urllib.request import urlopen
+from urllib2 import urlopen
 
 # Definition of variable
 minimalmodbus.BAUDRATE = 19200
@@ -49,7 +49,8 @@ start = time.time()
 
 def wLRead(slp,intcpt): 
     # Port name, slave address (in decimal)
-    instrument_wL = minimalmodbus.Instrument(comName, wL_slaveAddr) 
+    # instrument_wL = minimalmodbus.Instrument(comName, wL_slaveAddr)
+    instrument_2 = minimalmodbus.Instrument(devName, wL_slaveAddr)
     try:
         samplingList = []
         medianVal = 0
@@ -70,7 +71,7 @@ def wLRead(slp,intcpt):
         
         idn = instrument_wL.read_register(1, 0, 3)
         print('-----Liquid level sensor-----')
-        print('id = '+str(idn))
+        # print('id = '+str(idn))
         print('water level = ' + str(wLVal) + ' m')                
              
     except IOError:
@@ -83,7 +84,8 @@ def wLRead(slp,intcpt):
 def rfDepRead():
     global befVal, countVal, rg_countNum_Loop_2, rfDep
     # Port name, slave address (in decimal)
-    instrument_2 = minimalmodbus.Instrument(comName, rg_slaveAddr)    
+    # instrument_2 = minimalmodbus.Instrument(comName, rg_slaveAddr)
+    instrument_2 = minimalmodbus.Instrument(devName, rg_slaveAddr)
 
     try:
         # Register number, number of decimals, function code
@@ -97,28 +99,27 @@ def rfDepRead():
         # ------------------------ #
         while (rg_countNum_Loop_2 < 0):
             befVal = rf_realVal
-            print("Read value 1:", rf_realVal)
-            print("Previous value 1:", befVal)
-            print('------------------------')
+            # print("Read value 1:", rf_realVal)
+            # print("Previous value 1:", befVal)
+            # print('------------------------')
             rg_countNum_Loop_2 += 1
             break
         # ------------------------ #
         
         if boolTemp1 and (rf_realVal != befVal):
-            print("Detect additional rainfall")        
-            print("Read value 2:", rf_realVal)
-            print("Previous value 2:", befVal)
-            
-            print('------------------------')
+            # print("Detect additional rainfall")        
+            # print("Read value 2:", rf_realVal)
+            # print("Previous value 2:", befVal)            
+            # print('------------------------')
             befVal = rf_realVal
             countVal += 1
             rfDep = countVal * bucketVal
             
         else:
             boolTemp1 = not boolTemp1
-            print("Read value 3:", rf_realVal)
-            print("Previous value 3:", befVal)            
-            print('------------------------')
+            # print("Read value 3:", rf_realVal)
+            # print("Previous value 3:", befVal)            
+            # print('------------------------')
             befVal = rf_realVal
             
         print("Additional rainfall (T/F):",boolTemp1) 
@@ -175,19 +176,17 @@ def RGreading():
     global start, rg_countNum_Loop, countVal ,rfDep ,rfInts
     end = time.time()
     delSec = end - start # Unit in sec    
-    rfDep = rfDepRead() # Unit in mm
-    
+    rfDep = rfDepRead() # Unit in mm   
 
     if (rg_countNum_Loop < 0):
         httpPOST(rg_id_No, 0, 0, "Reboot")
-        rg_countNum_Loop += 1
-        
+        rg_countNum_Loop += 1        
 
-    if (delSec - 120) > 0:  
+    if (delSec - 600) > 0:  
         rfInts = rfDep/(600/3600) # Unit in mm/hr every 10 mins
-        print("Count value 1:", countVal)
-        print('Rainfall depth 1: ',rfDep,' mm') 
-        print('Rainfall intensity 1: ',rfInts,' mm/hr')
+        # print("Count value 1:", countVal)
+        # print('Rainfall depth 1: ',rfDep,' mm') 
+        # print('Rainfall intensity 1: ',rfInts,' mm/hr')
         start  = end   
 
         data1 = round(rfInts,3) 
@@ -196,18 +195,16 @@ def RGreading():
         countVal  = 0        
         rfInts    = 0
         rfDep     = 0
-        #data1     = 0     
-        
-        #print("Upload time : %s" % timeStamp)    
-        print('------------------------')        
+        # print("Upload time : %s" % timeStamp)    
+        # print('------------------------')        
     else:
         print('Continuous detection.')
         print('------------------------')
         
 def WLreading():
     global countNum_Loop
-    slope = 0.00108
-    intercept = -16.99745
+    slope = 0.04626
+    intercept = -760.80073
     data3 = wLRead(slope, intercept)
     data4 = 0
 
@@ -218,8 +215,8 @@ def WLreading():
         httpPOST(wL_id_No, data3, data4, 0)           
 
 
-schedule.every(11).seconds.do(RGreading)
-schedule.every(91).seconds.do(WLreading)
+schedule.every(10).seconds.do(RGreading)  
+schedule.every(600).seconds.do(WLreading)
 
 
 try:
