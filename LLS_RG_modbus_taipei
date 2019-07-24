@@ -183,7 +183,7 @@ def RGreading():
         rg_countNum_Loop += 1        
 
     if (delSec - 600) > 0:  
-        rfInts = rfDep/(600/3600) # Unit in mm/hr every 10 mins
+        rfInts = rfDep/0.1666667 # Unit in mm/hr every 10 mins
         # print("Count value 1:", countVal)
         # print('Rainfall depth 1: ',rfDep,' mm') 
         # print('Rainfall intensity 1: ',rfInts,' mm/hr')
