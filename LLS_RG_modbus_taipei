@@ -33,8 +33,8 @@ rg_slaveAddr = 2
 
 devName = '/dev/ttyUSB0' # RPI    format
 comName = 'COM5'         # Window format
-rg_id_No = "8999"
-wL_id_No = "6999"
+rg_id_No = "8001" # Songde North: 8001
+wL_id_No = "6001" # Songde North: 6001 # Songde South: 6002
 
 rg_countNum_Loop   = -1
 rg_countNum_Loop_2 = -1
