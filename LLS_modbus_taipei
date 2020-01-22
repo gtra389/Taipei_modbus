@@ -21,7 +21,7 @@ minimalmodbus.BAUDRATE = 19200
 wL_slaveAddr = 1
 devName = '/dev/ttyUSB0' # RPI    format
 comName = 'COM5'        # Window format
-id_No = "4999"
+id_No = "6003"
 countNum_Loop = -1
 
 def wLRead(slp,intcpt): 
