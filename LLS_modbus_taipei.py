@@ -114,8 +114,8 @@ def httpPOST(String0, String1, String2, String3):
 init_RS485_can()    
 try:
     while True:
-        slope = 0.04626
-        intercept = -760.80073
+        slope = 0.05283
+        intercept = -871.05253
         data1 = wLRead(slope, intercept)
         data2 = 0
         
