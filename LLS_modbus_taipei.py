@@ -15,14 +15,25 @@ import time
 from time import gmtime, strftime
 # from urllib.request import urlopen
 from urllib2 import urlopen
+import RPi.GPIO as GPIO
+
 
 # Definition of variable
 minimalmodbus.BAUDRATE = 19200
 wL_slaveAddr = 1
-devName = '/dev/ttyUSB0' # RPI    format
-comName = 'COM5'        # Window format
+# devName = '/dev/ttyUSB0' # RPI format via USB
+devName = "/dev/serial0"   # pi zero
+# comName = 'COM5'         # Window format
+
 id_No = "6003"
 countNum_Loop = -1
+
+def init_RS485_can():
+    EN_485 =  4
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(EN_485,GPIO.OUT)
+    GPIO.output(EN_485,GPIO.HIGH)
+    
 
 def wLRead(slp,intcpt): 
     # Port name, slave address (in decimal)
@@ -99,7 +110,8 @@ def httpPOST(String0, String1, String2, String3):
         resp = urlopen(url).read()
         print(resp)
         print('------------------------')
-    
+
+init_RS485_can()    
 try:
     while True:
         slope = 0.04626
